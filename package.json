@@ -1,0 +1,25 @@
+{
+  "name": "coins-web3",
+  "version": "0.0.1",
+  "description": "coins web3 js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wake-z/coins-web3.git"
+  },
+  "keywords": [
+    "web3"
+  ],
+  "author": "wake.z",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wake-z/coins-web3/issues"
+  },
+  "homepage": "https://github.com/wake-z/coins-web3#readme",
+  "dependencies": {
+    "web3": "^4.1.2"
+  }
+}
