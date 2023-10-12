@@ -1,8 +1,9 @@
 {
   "name": "coins-web3",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "coins web3 js",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
