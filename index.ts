@@ -1,3 +1,3 @@
-import { getWalletInfo } from "./src/web3";
+import { getWalletInfo, deposit, getBalance, sign } from "./src/web3";
 
-export { getWalletInfo };
+export { getWalletInfo, deposit, getBalance, sign };

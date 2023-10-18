@@ -12,13 +12,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSign = exports.deposit = exports.getWalletInfo = exports.parseAmount = void 0;
+exports.sign = exports.getBalance = exports.deposit = exports.getWalletInfo = exports.parseAmount = void 0;
 const web3_1 = __importDefault(require("web3"));
 const units_1 = require("@ethersproject/units");
 const tokenAbi_1 = __importDefault(require("./tokenAbi"));
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 const TRANSFORM_ADDRESS = "0x3F94bc9C56afd05D011C7E6673841438e1ae4846";
 const GAS = 320000;
+const getToken = (key) => (obj) => obj[key];
+const TOKEN = {
+    USDT: {
+        contract: "",
+        decimal: 6,
+        name: "USDT"
+    },
+    USDC: {
+        contract: "0xe9DcE89B076BA6107Bb64EF30678efec11939234",
+        decimal: 6,
+        name: "USDC"
+    }
+};
 const parseAmount = (num = "0", decimal = 18) => {
     return (0, units_1.parseUnits)(num, decimal).toString();
 };
@@ -51,33 +64,7 @@ const getWalletInfo = () => __awaiter(void 0, void 0, void 0, function* () {
 exports.getWalletInfo = getWalletInfo;
 const myObject = {};
 const deposit = (amount = "0", tokenName = "USDC") => __awaiter(void 0, void 0, void 0, function* () {
-    // const TOKEN = {
-    //   USDT: {
-    //     contract: "",
-    //     decimal: 6,
-    //     name: "USDT"
-    //   },
-    //   USDC: {
-    //     contract: "0xe9DcE89B076BA6107Bb64EF30678efec11939234",
-    //     decimal: 6,
-    //     name: "USDC"
-    //   }
-    // }
-    const _getKeyValue_ = (key) => (obj) => obj[key];
-    const TOKEN = {
-        USDT: {
-            contract: "",
-            decimal: 6,
-            name: "USDT"
-        },
-        USDC: {
-            contract: "0xe9DcE89B076BA6107Bb64EF30678efec11939234",
-            decimal: 6,
-            name: "USDC"
-        }
-    };
-    const token = _getKeyValue_(tokenName)(TOKEN);
-    // const token = TOKEN[tokenName]
+    const token = getToken(tokenName)(TOKEN);
     const { contract, decimal } = token;
     const web3 = new web3_1.default(window.ethereum);
     const myContract = new web3.eth.Contract(tokenAbi_1.default, contract);
@@ -94,8 +81,24 @@ const deposit = (amount = "0", tokenName = "USDC") => __awaiter(void 0, void 0, 
     }
 });
 exports.deposit = deposit;
+// 获取 balance
+const getBalance = (tokenName = "USDC") => __awaiter(void 0, void 0, void 0, function* () {
+    const token = getToken(tokenName)(TOKEN);
+    const { contract, decimal } = token;
+    const web3 = new web3_1.default(window.ethereum);
+    const myContract = new web3.eth.Contract(tokenAbi_1.default, contract);
+    const accounts = yield window.ethereum.enable();
+    try {
+        const res = yield myContract.methods.balanceOf(accounts[0]).call();
+        return (0, units_1.formatUnits)(res, decimal);
+    }
+    catch (err) {
+        return '0';
+    }
+});
+exports.getBalance = getBalance;
 // sign
-const getSign = (address, str) => __awaiter(void 0, void 0, void 0, function* () {
+const sign = (address, str) => __awaiter(void 0, void 0, void 0, function* () {
     if (!address || !str) {
         return {
             sign: '',
@@ -118,19 +121,4 @@ const getSign = (address, str) => __awaiter(void 0, void 0, void 0, function* ()
         };
     }
 });
-exports.getSign = getSign;
-// // web3.eth.getBalance(currentAccount)
-// export const getBalance = async (address) => {
-//   if (!address) {
-//     return '0'
-//   }
-//   try { 
-//     const web3 = new Web3(window.ethereum);
-//     const account = await web3.eth.getBalance(address)
-//     console.log('====account getBalance====', account)
-//     return account
-//   } catch (error) {
-//     console.log('====account getBalance error====', error)
-//     return '0'
-//   }
-// }
+exports.sign = sign;

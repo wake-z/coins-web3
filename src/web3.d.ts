@@ -4,7 +4,8 @@ export declare const getWalletInfo: () => Promise<{
     chainId: number;
 } | undefined>;
 export declare const deposit: (amount?: string | number, tokenName?: string) => Promise<any>;
-export declare const getSign: (address: string, str: string) => Promise<{
+export declare const getBalance: (tokenName?: string) => Promise<string>;
+export declare const sign: (address: string, str: string) => Promise<{
     sign: string;
     success: boolean;
 }>;
