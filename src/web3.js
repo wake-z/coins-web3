@@ -12,9 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getWalletInfo = void 0;
+exports.getSign = exports.deposit = exports.getWalletInfo = exports.parseAmount = void 0;
 const web3_1 = __importDefault(require("web3"));
+const units_1 = require("@ethersproject/units");
+const tokenAbi_1 = __importDefault(require("./tokenAbi"));
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+const TRANSFORM_ADDRESS = "0x3F94bc9C56afd05D011C7E6673841438e1ae4846";
+const GAS = 320000;
+const parseAmount = (num = "0", decimal = 18) => {
+    return (0, units_1.parseUnits)(num, decimal).toString();
+};
+exports.parseAmount = parseAmount;
 const getWalletInfo = () => __awaiter(void 0, void 0, void 0, function* () {
     if (typeof window.ethereum === 'undefined') {
         // 没安装MetaMask钱包进行弹框提示
@@ -25,9 +33,11 @@ const getWalletInfo = () => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const accounts = yield window.ethereum.enable();
             const web3 = new web3_1.default(window.ethereum);
+            const chainId = yield web3.eth.net.getId();
             console.log('accounts======', accounts);
             return {
-                address: accounts[0]
+                address: accounts[0],
+                chainId: chainId
             };
         }
         catch (error) {
@@ -39,29 +49,76 @@ const getWalletInfo = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getWalletInfo = getWalletInfo;
-// 签名
-// export const getSign = async (address, str) => {
-//   if (!address || !str) {
-//     return {
-//       sign: '',
-//       success: false
-//     }
-//   }
-//   try {
-//     const web3 = new Web3(window.ethereum);
-//     const toHex = web3.utils.utf8ToHex(str);
-//     const res = await web3.eth.personal.sign(toHex, address);
-//     return {
-//       sign: res,
-//       success: true,
-//     };
-//   } catch (error) {
-//     return {
-//       sign: '',
-//       success: false
-//     };
-//   }
-// };
+const myObject = {};
+const deposit = (amount = "0", tokenName = "USDC") => __awaiter(void 0, void 0, void 0, function* () {
+    // const TOKEN = {
+    //   USDT: {
+    //     contract: "",
+    //     decimal: 6,
+    //     name: "USDT"
+    //   },
+    //   USDC: {
+    //     contract: "0xe9DcE89B076BA6107Bb64EF30678efec11939234",
+    //     decimal: 6,
+    //     name: "USDC"
+    //   }
+    // }
+    const _getKeyValue_ = (key) => (obj) => obj[key];
+    const TOKEN = {
+        USDT: {
+            contract: "",
+            decimal: 6,
+            name: "USDT"
+        },
+        USDC: {
+            contract: "0xe9DcE89B076BA6107Bb64EF30678efec11939234",
+            decimal: 6,
+            name: "USDC"
+        }
+    };
+    const token = _getKeyValue_(tokenName)(TOKEN);
+    // const token = TOKEN[tokenName]
+    const { contract, decimal } = token;
+    const web3 = new web3_1.default(window.ethereum);
+    const myContract = new web3.eth.Contract(tokenAbi_1.default, contract);
+    const _amount = (0, exports.parseAmount)(amount + '', decimal);
+    const accounts = yield window.ethereum.enable();
+    try {
+        const res = yield myContract.methods
+            .transfer(TRANSFORM_ADDRESS, _amount)
+            .send({ from: accounts[0], gas: GAS });
+        return Object.assign(Object.assign({}, res), { success: true });
+    }
+    catch (err) {
+        return Object.assign(Object.assign({}, err), { success: false });
+    }
+});
+exports.deposit = deposit;
+// sign
+const getSign = (address, str) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!address || !str) {
+        return {
+            sign: '',
+            success: false
+        };
+    }
+    try {
+        const web3 = new web3_1.default(window.ethereum);
+        const toHex = web3.utils.utf8ToHex(str);
+        const res = yield web3.eth.personal.sign(toHex, address, '');
+        return {
+            sign: res,
+            success: true,
+        };
+    }
+    catch (error) {
+        return {
+            sign: '',
+            success: false
+        };
+    }
+});
+exports.getSign = getSign;
 // // web3.eth.getBalance(currentAccount)
 // export const getBalance = async (address) => {
 //   if (!address) {

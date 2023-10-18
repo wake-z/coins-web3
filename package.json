@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/wake-z/coins-web3#readme",
   "dependencies": {
-    "web3": "^4.1.2"
+    "@ethersproject/units": "^5.7.0",
+    "web3": "^1.10.0",
+    "web3-utils": "^1.10.2"
   }
 }
