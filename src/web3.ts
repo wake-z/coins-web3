@@ -16,7 +16,7 @@ interface Token {
 
 const TOKEN: Token = {
   USDT: {
-    contract: "",
+    contract: "0xAcDe43b9E5f72a4F554D4346e69e8e7AC8F352f0",
     decimal: 6,
     name: "USDT"
   },
