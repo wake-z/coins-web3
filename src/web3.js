@@ -17,17 +17,30 @@ const web3_1 = __importDefault(require("web3"));
 const units_1 = require("@ethersproject/units");
 const tokenAbi_1 = __importDefault(require("./tokenAbi"));
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
-const TRANSFORM_ADDRESS = "0x3F94bc9C56afd05D011C7E6673841438e1ae4846";
+const TRANSFORM_ADDRESS_80001 = "0x3F94bc9C56afd05D011C7E6673841438e1ae4846";
+const TRANSFORM_ADDRESS_137 = "0x49c678000a3a473FA3AcE14067035371568aB7f1";
 const GAS = 320000;
 const getToken = (key) => (obj) => obj[key];
-const TOKEN = {
+const TOKEN_80001 = {
     USDT: {
-        contract: "",
+        contract: "0xAcDe43b9E5f72a4F554D4346e69e8e7AC8F352f0",
         decimal: 6,
         name: "USDT"
     },
     USDC: {
         contract: "0xe9DcE89B076BA6107Bb64EF30678efec11939234",
+        decimal: 6,
+        name: "USDC"
+    }
+};
+const TOKEN_137 = {
+    USDT: {
+        contract: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+        decimal: 6,
+        name: "USDT"
+    },
+    USDC: {
+        contract: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
         decimal: 6,
         name: "USDC"
     }
@@ -63,8 +76,11 @@ const getWalletInfo = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getWalletInfo = getWalletInfo;
 const myObject = {};
-const deposit = (amount = "0", tokenName = "USDC") => __awaiter(void 0, void 0, void 0, function* () {
-    const token = getToken(tokenName)(TOKEN);
+const deposit = (amount = "0", tokenName = "USDC", chainId = "137") => __awaiter(void 0, void 0, void 0, function* () {
+    const chain = parseInt(chainId) === 80001 ? '80001' : '137';
+    const tokenInfo = chain === '80001' ? TOKEN_80001 : TOKEN_137;
+    const transformAddress = chain === '80001' ? TRANSFORM_ADDRESS_80001 : TRANSFORM_ADDRESS_137;
+    const token = getToken(tokenName)(tokenInfo);
     const { contract, decimal } = token;
     const web3 = new web3_1.default(window.ethereum);
     const myContract = new web3.eth.Contract(tokenAbi_1.default, contract);
@@ -72,7 +88,7 @@ const deposit = (amount = "0", tokenName = "USDC") => __awaiter(void 0, void 0, 
     const accounts = yield window.ethereum.enable();
     try {
         const res = yield myContract.methods
-            .transfer(TRANSFORM_ADDRESS, _amount)
+            .transfer(transformAddress, _amount)
             .send({ from: accounts[0], gas: GAS });
         return Object.assign(Object.assign({}, res), { success: true });
     }
@@ -82,8 +98,10 @@ const deposit = (amount = "0", tokenName = "USDC") => __awaiter(void 0, void 0, 
 });
 exports.deposit = deposit;
 // 获取 balance
-const getBalance = (tokenName = "USDC") => __awaiter(void 0, void 0, void 0, function* () {
-    const token = getToken(tokenName)(TOKEN);
+const getBalance = (tokenName = "USDC", chainId = "137") => __awaiter(void 0, void 0, void 0, function* () {
+    const chain = parseInt(chainId) === 80001 ? '80001' : '137';
+    const tokenInfo = chain === '80001' ? TOKEN_80001 : TOKEN_137;
+    const token = getToken(tokenName)(tokenInfo);
     const { contract, decimal } = token;
     const web3 = new web3_1.default(window.ethereum);
     const myContract = new web3.eth.Contract(tokenAbi_1.default, contract);

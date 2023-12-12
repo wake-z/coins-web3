@@ -5,7 +5,9 @@ import TOKEN_ABI from './tokenAbi'
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-const TRANSFORM_ADDRESS = "0x3F94bc9C56afd05D011C7E6673841438e1ae4846"
+const TRANSFORM_ADDRESS_80001 = "0x3F94bc9C56afd05D011C7E6673841438e1ae4846"
+const TRANSFORM_ADDRESS_137 = "0x49c678000a3a473FA3AcE14067035371568aB7f1"
+
 const GAS = 320000;
 
 const getToken = (key: string) => (obj: Record<string, any>) => obj[key];
@@ -14,7 +16,7 @@ interface Token {
   USDC: object;
 }
 
-const TOKEN: Token = {
+const TOKEN_80001: Token = {
   USDT: {
     contract: "0xAcDe43b9E5f72a4F554D4346e69e8e7AC8F352f0",
     decimal: 6,
@@ -22,6 +24,19 @@ const TOKEN: Token = {
   },
   USDC: {
     contract: "0xe9DcE89B076BA6107Bb64EF30678efec11939234",
+    decimal: 6,
+    name: "USDC"
+  }
+};
+
+const TOKEN_137: Token = {
+  USDT: {
+    contract: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+    decimal: 6,
+    name: "USDT"
+  },
+  USDC: {
+    contract: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
     decimal: 6,
     name: "USDC"
   }
@@ -57,9 +72,12 @@ export const getWalletInfo = async () => {
 
 const myObject: Record<string, any> = {}
 
-export const deposit = async (amount : string | number = "0", tokenName:string = "USDC") => {
+export const deposit = async (amount : string | number = "0", tokenName:string = "USDC", chainId : string = "137") => {
 
-  const token = getToken(tokenName)(TOKEN);
+  const chain = parseInt(chainId) === 80001 ? '80001' : '137'
+  const tokenInfo = chain === '80001' ? TOKEN_80001 : TOKEN_137
+  const transformAddress = chain === '80001' ? TRANSFORM_ADDRESS_80001 : TRANSFORM_ADDRESS_137
+  const token = getToken(tokenName)(tokenInfo);
 
   const { contract, decimal } = token
   const web3 = new Web3((window as any).ethereum)
@@ -71,7 +89,7 @@ export const deposit = async (amount : string | number = "0", tokenName:string =
 
   try {
     const res = await myContract.methods
-      .transfer(TRANSFORM_ADDRESS, _amount)
+      .transfer(transformAddress, _amount)
       .send({ from: accounts[0], gas: GAS });
     return {
       ...res,
@@ -86,9 +104,12 @@ export const deposit = async (amount : string | number = "0", tokenName:string =
 }
 
 // 获取 balance
-export const getBalance = async (tokenName = "USDC") => {
+export const getBalance = async (tokenName = "USDC", chainId : string = "137") => {
 
-  const token = getToken(tokenName)(TOKEN);
+  const chain = parseInt(chainId) === 80001 ? '80001' : '137'
+  const tokenInfo = chain === '80001' ? TOKEN_80001 : TOKEN_137
+  const token = getToken(tokenName)(tokenInfo);
+
   const { contract, decimal } = token
   const web3 = new Web3((window as any).ethereum)
   
